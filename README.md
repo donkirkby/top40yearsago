@@ -1,6 +1,9 @@
 Collecting data for my [@top40yearsago] Twitter project.
 
-So far, I've found the Billboard [Hot 100] in a big CSV file. The Canadian charts are available on a government [web site][cancon], but they're all PDF scans. The British charts are available from the [Official Charts Company][brits].
+So far, I've found the Billboard [Hot 100] in a big CSV file. The Canadian
+charts are available on a government [web site][cancon], but they're all PDF
+scans. The British charts are available from the
+[Official Charts Company][brits].
 
 Here are some ideas for topics:
 * Top of the chart this week.
