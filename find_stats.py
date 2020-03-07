@@ -5,7 +5,7 @@ from operator import attrgetter
 import pandas as pd
 from pandas import DataFrame
 
-DATE_DISPLAY_FORMAT = '%Y-%m-%d'
+DATE_DISPLAY_FORMAT = '%d %b %Y'
 DATE_STORED_FORMAT = '%-m/%-d/%Y'
 
 
@@ -35,12 +35,20 @@ def parse_date(date_text: str):
     return datetime.strptime(date_text, DATE_DISPLAY_FORMAT)
 
 
-def find_diffs(max_position, base, other, title, all_weeks):
+def find_diffs(max_position, min_peak, base, other, all_weeks):
+    """ Report changes in a certain range.
+
+    :param max_position: the maximum position to report (40 for top 40)
+    :param min_peak: the minimum peak position to report (excluded)
+    :param base: data frame holding the current week's songs
+    :param other: data frame holding the previous week's songs
+    :param all_weeks: data frame holding songs for all weeks
+    """
     top_base = base[base['week_position'] <= max_position]
     top_other = other[other['week_position'] <= max_position]
     added_song_ids = set(top_base['songid']) - set(top_other['songid'])
     added_songs = base[base['songid'].isin(added_song_ids)].sort_values('all_time_peak')
-    display_songs(f'{title} in top {max_position}', added_songs, all_weeks)
+    display_songs(f'entered the #Top{max_position}', added_songs, all_weeks, min_peak)
 
 
 def main():
@@ -59,23 +67,22 @@ def main():
     prev_week_df = all_weeks[all_weeks['weekid'] == prev_week_text].copy()
     if prev_week_df.empty:
         exit(f'No data found for {prev_week_text}.')
-    top_song = week_df[week_df['week_position'] == 1]
 
-    display_songs('Top Song', top_song, all_weeks)
-    find_diffs(100, week_df, prev_week_df, 'New songs', all_weeks)
-    find_diffs(40, week_df, prev_week_df, 'New songs', all_weeks)
-    find_diffs(10, week_df, prev_week_df, 'New songs', all_weeks)
-    find_diffs(1, week_df, prev_week_df, 'New songs', all_weeks)
-    find_diffs(1, prev_week_df, week_df, 'Dropped songs', all_weeks)
-    find_diffs(10, prev_week_df, week_df, 'Dropped songs', all_weeks)
-    find_diffs(40, prev_week_df, week_df, 'Dropped songs', all_weeks)
-    find_diffs(100, prev_week_df, week_df, 'Dropped songs', all_weeks)
+    find_diffs(100, 40, week_df, prev_week_df, all_weeks)
+    find_diffs(40, 10, week_df, prev_week_df, all_weeks)
+    find_diffs(10, 1, week_df, prev_week_df, all_weeks)
+    find_diffs(1, 0, week_df, prev_week_df, all_weeks)
 
 
-def display_songs(heading, songs, all_weeks):
+def display_performer(performer: str) -> str:
+    return '#' + performer.replace(' ', '')
+
+
+def display_songs(heading, songs, all_weeks, min_peak):
     if not songs.empty:
         print(heading)
         displays = []
+        stored_format = DATE_STORED_FORMAT.replace('-', '')
         for song in songs.itertuples():
             display = Namespace(song=song)
             song_entries = all_weeks[all_weeks['songid'] == song.songid]
@@ -94,14 +101,18 @@ def display_songs(heading, songs, all_weeks):
                             str(song_entry.week_position))
                 positions.append(pos_text)
             display.peak_position = peak_pos
-            display.peak_date = peak_date
+            display.peak_date = datetime.strptime(peak_date, stored_format)
             display.positions = positions
-            displays.append(display)
+            if peak_pos > min_peak:
+                displays.append(display)
         displays.sort(key=attrgetter('peak_position'))
         for display in displays:
             song = display.song
-            print(f'{song.song} at #{song.week_position} by {song.performer} '
-                  f'peaked at {display.peak_position} on {display.peak_date}')
+            performer = display_performer(song.performer)
+            print(f'40 years ago this week, "{song.song}" by {performer} '
+                  f'{heading} at {song.week_position}. It peaked at '
+                  f'{display.peak_position} on '
+                  f'{display.peak_date.strftime(DATE_DISPLAY_FORMAT)}. #1980s')
             print(', '.join(display.positions))
         print()
 
