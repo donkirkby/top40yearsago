@@ -21,6 +21,7 @@ def parse_args():
     default_date += timedelta(days=7-(days_offset.days % 7))
     default_date_text = default_date.strftime(DATE_DISPLAY_FORMAT)
 
+    # noinspection PyTypeChecker
     parser = ArgumentParser(description='Find top 40 events from 40 years ago.',
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('date',
@@ -72,6 +73,7 @@ def main():
     find_diffs(40, 10, week_df, prev_week_df, all_weeks)
     find_diffs(10, 1, week_df, prev_week_df, all_weeks)
     find_diffs(1, 0, week_df, prev_week_df, all_weeks)
+    find_diffs(1, 0, prev_week_df, week_df, all_weeks)
 
 
 def display_performer(performer: str) -> str:
