@@ -1,4 +1,4 @@
-Collecting data for my [@top40yearsago] Twitter project.
+Collecting data for my [@top40yearsago] Twitter project, now experimenting with a <a rel="me" href="https://musician.social/@top40yearsago">@top40yearsago@musician.social</a> Mastodon account.
 
 So far, I've found the Billboard [Hot 100] in a big CSV file. The Canadian
 charts are available on a government [web site][cancon], but they're all PDF
