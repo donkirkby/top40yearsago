@@ -1,0 +1,27 @@
+name: Post to Mastodon
+
+on:
+  schedule:
+    - cron: 0 * * * *
+
+jobs:
+  post:
+    name: Run scan_issues.py
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip pipenv
+          python -m pipenv install
+      - name: Scan
+        run: python scan_issues.py
+        env:
+          TOP40URL: ${{ secrets.Top40Url }}
+          TOP40ACCESSTOKEN: ${{ secrets.Top40AccessToken }}
+          GITHUBREPO: ${{ secrets.GitHubRepo }}
+          GITHUBTOKEN: ${{ secrets.GitHubToken }}

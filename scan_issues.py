@@ -33,6 +33,7 @@ def main():
     url = f'https://api.github.com/repos/{github_repo}/issues?labels=post'
     response = requests.get(url)
     response.raise_for_status()
+    toot_count = 0
     for issue in response.json():
         title: str = issue['title']
         body = issue['body']
@@ -44,6 +45,8 @@ def main():
                 headers={'Authorization': f'Bearer {github_token}'})
             response.raise_for_status()
             mastodon.status_post(body)
+            toot_count += 1
+    print(f'Toots: {toot_count}.')
 
 
 if __name__ == '__main__':
