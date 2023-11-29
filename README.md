@@ -17,6 +17,14 @@ Here are some ideas for topics:
 
 Try to include a youtube or spotify link in each tweet. Try to spread out mentions of the same song.
 
+To configure the Mastodon uploader app, edit your Mastodon profile, and click on
+the Development section. Add a new application with read and write scopes, but
+no admin or follow. Copy the access token from the new app, and paste it as the
+`TOP40ACCESSTOKEN` environment variable when you run `scan_issues.py`. Also, add
+a `TOP40URL` environment variable with the Mastodon server's URL. Create a
+personal access token in GitHub, and configure the `GITHUBTOKEN` and
+`GITHUBREPO` environment variables.
+
 [@top40yearsago]: https://twitter.com/top40yearsago
 [Hot 100]: https://data.world/kcmillersean/billboard-hot-100-1958-2017
 [cancon]: http://www.bac-lac.gc.ca/eng/discover/films-videos-sound-recordings/rpm/Pages/rpm.aspx

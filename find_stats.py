@@ -114,7 +114,8 @@ def display_songs(heading, songs, all_weeks, min_peak):
             print(f'40 years ago this week, "{song.song}" by {performer} '
                   f'{heading} at {song.week_position}. It peaked at '
                   f'{display.peak_position} on '
-                  f'{display.peak_date.strftime(DATE_DISPLAY_FORMAT)}. #1980s')
+                  f'{display.peak_date.strftime(DATE_DISPLAY_FORMAT)}. #1980s '
+                  f'#musichistory #musicvideo')
             print(', '.join(display.positions))
         print()
 
