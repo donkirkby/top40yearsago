@@ -19,7 +19,7 @@ jobs:
           python -m pip install --upgrade pip pipenv
           python -m pipenv install
       - name: Scan
-        run: python scan_issues.py
+        run: pipenv run python scan_issues.py
         env:
           TOP40URL: ${{ secrets.Top40Url }}
           TOP40ACCESSTOKEN: ${{ secrets.Top40AccessToken }}
