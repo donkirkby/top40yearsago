@@ -5,13 +5,15 @@ from zoneinfo import ZoneInfo
 import requests
 from mastodon import Mastodon
 
+TZ = ZoneInfo('America/Vancouver')
+
 
 def can_post(title: str, now: datetime = None):
     if now is None:
-        tz = ZoneInfo('America/Vancouver')
-        now = datetime.now(tz)
+        now = datetime.now(TZ)
     try:
-        post_date = datetime.strptime(title[:10], '%Y-%m-%d')
+        post_date = datetime.strptime(title[:10],'%Y-%m-%d')
+        post_date = post_date.replace(tzinfo=TZ)
     except ValueError:
         # If it doesn't start with a date, we can't post it.
         return False

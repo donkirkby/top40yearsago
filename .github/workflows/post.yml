@@ -1,6 +1,9 @@
 name: Post to Mastodon
 
 on:
+  push:
+    branches:
+      - master
   schedule:
     - cron: 0 * * * *
 
