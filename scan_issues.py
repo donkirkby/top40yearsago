@@ -17,7 +17,7 @@ def can_post(title: str, now: datetime = None):
     except ValueError:
         # If it doesn't start with a date, we can't post it.
         return False
-    post_date += timedelta(hours=post_date.day)
+    post_date += timedelta(hours=post_date.day % 24)
     while post_date.hour < 6:
         post_date += timedelta(hours=12)
     while 18 <= post_date.hour:

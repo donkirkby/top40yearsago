@@ -49,6 +49,16 @@ def test_after_six_pm(now_text, should_post):
     assert decision == should_post
 
 
+@pytest.mark.parametrize('now_text,should_post',
+                         [('2020-06-25 12:59', False),
+                          ('2020-06-25 13:00', True)])
+def test_late_in_month(now_text, should_post):
+    now = datetime.strptime(now_text, '%Y-%m-%d %H:%M').replace(tzinfo=TZ)
+    title = '2020-06-25 Example'
+    decision = can_post(title, now)
+    assert decision == should_post
+
+
 def test_no_date():
     title = 'No date example'
     assert not can_post(title)
