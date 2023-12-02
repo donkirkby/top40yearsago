@@ -32,8 +32,9 @@ def main():
                         access_token=access_token)
     github_repo = os.environ['GITHUBREPO']
     github_token = os.environ['GITHUBTOKEN']
+    authorization_header = {'Authorization': f'Bearer {github_token}'}
     url = f'https://api.github.com/repos/{github_repo}/issues?labels=post'
-    response = requests.get(url)
+    response = requests.get(url, headers=authorization_header)
     response.raise_for_status()
     toot_count = 0
     for issue in response.json():
@@ -41,10 +42,9 @@ def main():
         body = issue['body']
         if can_post(title):
             issue_url = issue['url']
-            response = requests.patch(
-                issue_url,
-                json=dict(state='closed'),
-                headers={'Authorization': f'Bearer {github_token}'})
+            response = requests.patch(issue_url,
+                                      json=dict(state='closed'),
+                                      headers=authorization_header)
             response.raise_for_status()
             mastodon.status_post(body)
             toot_count += 1
