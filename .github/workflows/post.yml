@@ -6,7 +6,7 @@ on:
       - master
   schedule:
     # hourly, PST 0600 to 1700, converted to UTC: 1400-2500 or 1300-2400
-    - cron: 0 0-1,14-23 * * *
+    - cron: 0 0-1,13-23 * * *
 
 jobs:
   post:
