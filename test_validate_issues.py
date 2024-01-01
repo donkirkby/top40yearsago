@@ -18,9 +18,17 @@ def test_non_post():
     validate_issue(issue)  # Doesn't raise error.
 
 
-def test(next_week):
-    issue = dict(title=f'{next_week} No YouTube',
+def test_good_post(next_week):
+    issue = dict(title=f'{next_week} Regular YouTube',
                  body='Cool song, bro! https://youtube.com/watch?v=1234',
+                 labels=[dict(name='post')])
+
+    validate_issue(issue)  # Doesn't raise error.
+
+
+def test_short_youtube(next_week):
+    issue = dict(title=f'{next_week} Short YouTube',
+                 body='Cool song, bro! https://youtu.be/1234',
                  labels=[dict(name='post')])
 
     validate_issue(issue)  # Doesn't raise error.

@@ -35,7 +35,7 @@ def validate_issue(issue: dict):
     if body_length > 500:
         raise ValueError(f'Post body is {body_length} characters long: '
                          f'{issue["title"]!r}.')
-    if re.search(r'https?://(www\.)?youtube\.com',
+    if re.search(r'https?://(www\.)?(youtube\.com|youtu\.be)',
                  issue['body']) is None:
         raise ValueError(f'Post has no YouTube link: {issue["title"]!r}.')
 
