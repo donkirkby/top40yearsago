@@ -1,21 +1,22 @@
+import logging
 import os
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 import requests
 from mastodon import Mastodon
 
-TZ = ZoneInfo('America/Vancouver')
+from validate_issues import parse_date_from_title, TZ, validate_issue
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def can_post(title: str, now: datetime = None):
     if now is None:
         now = datetime.now(TZ)
-    try:
-        post_date = datetime.strptime(title[:10],'%Y-%m-%d')
-        post_date = post_date.replace(tzinfo=TZ)
-    except ValueError:
-        # If it doesn't start with a date, we can't post it.
+    post_date = parse_date_from_title(title)
+    if post_date is None:
         return False
     post_date += timedelta(hours=post_date.day % 24)
     while post_date.hour < 6:
@@ -26,6 +27,7 @@ def can_post(title: str, now: datetime = None):
 
 
 def main():
+    logger.info('Scanning issues to post.')
     mastodon_url = os.environ['TOP40URL']
     access_token = os.environ['TOP40ACCESSTOKEN']
     mastodon = Mastodon(api_base_url=mastodon_url,
@@ -38,6 +40,11 @@ def main():
     response.raise_for_status()
     toot_count = 0
     for issue in response.json():
+        try:
+            validate_issue(issue)
+        except ValueError:
+            logger.warning('Invalid issue.', exc_info=True)
+            continue
         title: str = issue['title']
         body = issue['body']
         if can_post(title):
@@ -48,7 +55,7 @@ def main():
             response.raise_for_status()
             mastodon.status_post(body)
             toot_count += 1
-    print(f'Toots: {toot_count}.')
+    logger.info(f'Toots: {toot_count}.')
 
 
 if __name__ == '__main__':
