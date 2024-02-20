@@ -6,7 +6,7 @@ import pandas as pd
 from pandas import DataFrame
 
 DATE_DISPLAY_FORMAT = '%d %b %Y'
-DATE_STORED_FORMAT = '%-m/%-d/%Y'
+DATE_STORED_FORMAT = '%Y-%m-%d'
 
 
 def parse_args():
@@ -45,27 +45,29 @@ def find_diffs(max_position, min_peak, base, other, all_weeks):
     :param other: data frame holding the previous week's songs
     :param all_weeks: data frame holding songs for all weeks
     """
-    top_base = base[base['week_position'] <= max_position]
-    top_other = other[other['week_position'] <= max_position]
-    added_song_ids = set(top_base['songid']) - set(top_other['songid'])
-    added_songs = base[base['songid'].isin(added_song_ids)].sort_values('all_time_peak')
+    top_base = base[base['chart_position'] <= max_position]
+    top_other = other[other['chart_position'] <= max_position]
+    added_song_ids = set(top_base['song_id']) - set(top_other['song_id'])
+    added_songs = base[base['song_id'].isin(added_song_ids)].sort_values('all_time_peak')
     display_songs(f'entered the #Top{max_position}', added_songs, all_weeks, min_peak)
 
 
 def main():
     args = parse_args()
     print(f'Events for the week of {args.date.strftime(DATE_DISPLAY_FORMAT)}:')
-    # url,WeekID,Week Position,Song,Performer,SongID,Instance,Previous Week Position,Peak Position,Weeks on Chart
+    # chart_position,chart_date,song,performer,song_id,instance,time_on_chart,
+    # consecutive_weeks,previous_week,peak_position,worst_position,chart_debut,
+    # chart_url
     all_weeks = pd.read_csv('hot100.csv')
     all_weeks = all_weeks.rename(
         columns=lambda label: label.lower().replace(' ', '_'))
     all_weeks['all_time_peak'] = 0
     week_text = args.date.strftime(DATE_STORED_FORMAT)
-    week_df: DataFrame = all_weeks[all_weeks['weekid'] == week_text].copy()
+    week_df: DataFrame = all_weeks[all_weeks['chart_date'] == week_text].copy()
     if week_df.empty:
         exit(f'No data found for {week_text}.')
     prev_week_text = (args.date-timedelta(days=7)).strftime(DATE_STORED_FORMAT)
-    prev_week_df = all_weeks[all_weeks['weekid'] == prev_week_text].copy()
+    prev_week_df = all_weeks[all_weeks['chart_date'] == prev_week_text].copy()
     if prev_week_df.empty:
         exit(f'No data found for {prev_week_text}.')
 
@@ -84,23 +86,23 @@ def display_songs(heading, songs, all_weeks, min_peak):
     if not songs.empty:
         print(heading)
         displays = []
-        stored_format = DATE_STORED_FORMAT.replace('-', '')
+        stored_format = DATE_STORED_FORMAT  # .replace('-', '')
         for song in songs.itertuples():
             display = Namespace(song=song)
-            song_entries = all_weeks[all_weeks['songid'] == song.songid]
+            song_entries = all_weeks[all_weeks['song_id'] == song.song_id]
             song_entries = song_entries.sort_values(['instance',
-                                                     'weeks_on_chart'])
+                                                     'time_on_chart'])
             positions = []
             peak_pos = None
             peak_date = None
             for song_entry in song_entries.itertuples():
-                if peak_pos is None or song_entry.week_position < peak_pos:
-                    peak_date = song_entry.weekid
-                    peak_pos = song_entry.week_position
-                prefix = '#' if song_entry.weekid == song.weekid else ''
+                if peak_pos is None or song_entry.chart_position < peak_pos:
+                    peak_date = song_entry.chart_date
+                    peak_pos = song_entry.chart_position
+                prefix = '#' if song_entry.chart_date == song.chart_date else ''
                 pos_text = ('*'*(song_entry.instance-1) +
                             prefix +
-                            str(song_entry.week_position))
+                            str(song_entry.chart_position))
                 positions.append(pos_text)
             display.peak_position = peak_pos
             display.peak_date = datetime.strptime(peak_date, stored_format)
@@ -112,7 +114,7 @@ def display_songs(heading, songs, all_weeks, min_peak):
             song = display.song
             performer = display_performer(song.performer)
             print(f'40 years ago this week, "{song.song}" by {performer} '
-                  f'{heading} at {song.week_position}. It peaked at '
+                  f'{heading} at {song.chart_position}. It peaked at '
                   f'{display.peak_position} on '
                   f'{display.peak_date.strftime(DATE_DISPLAY_FORMAT)}. #1980s '
                   f'#MusicHistory #MusicVideo')
