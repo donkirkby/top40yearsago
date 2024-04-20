@@ -86,28 +86,9 @@ def display_songs(heading, songs, all_weeks, min_peak):
     if not songs.empty:
         print(heading)
         displays = []
-        stored_format = DATE_STORED_FORMAT  # .replace('-', '')
         for song in songs.itertuples():
-            display = Namespace(song=song)
-            song_entries = all_weeks[all_weeks['song_id'] == song.song_id]
-            song_entries = song_entries.sort_values(['instance',
-                                                     'time_on_chart'])
-            positions = []
-            peak_pos = None
-            peak_date = None
-            for song_entry in song_entries.itertuples():
-                if peak_pos is None or song_entry.chart_position < peak_pos:
-                    peak_date = song_entry.chart_date
-                    peak_pos = song_entry.chart_position
-                prefix = '#' if song_entry.chart_date == song.chart_date else ''
-                pos_text = ('*'*(song_entry.instance-1) +
-                            prefix +
-                            str(song_entry.chart_position))
-                positions.append(pos_text)
-            display.peak_position = peak_pos
-            display.peak_date = datetime.strptime(peak_date, stored_format)
-            display.positions = positions
-            if peak_pos > min_peak:
+            display = find_peak(song, all_weeks)
+            if display.peak_position > min_peak:
                 displays.append(display)
         displays.sort(key=attrgetter('peak_position'))
         for display in displays:
@@ -119,7 +100,46 @@ def display_songs(heading, songs, all_weeks, min_peak):
                   f'{display.peak_date.strftime(DATE_DISPLAY_FORMAT)}. #1980s '
                   f'#MusicHistory #MusicVideo')
             print(', '.join(display.positions))
+            performer_history_displays = []
+            performer_songs = all_weeks[all_weeks['performer'] == song.performer]
+            for other_song_name, other_song_entries in performer_songs.groupby('song'):
+                other_song = next(other_song_entries.itertuples())
+                other_display = find_peak(other_song, other_song_entries)
+                performer_history_displays.append(other_display)
+            performer_history_displays.sort(key=attrgetter('peak_date'))
+            performer_history = []
+            for other_display in performer_history_displays:
+                other_date_display = other_display.peak_date.strftime(DATE_DISPLAY_FORMAT)
+                performer_history.append(f'{other_display.song.song} '
+                                         f'#{other_display.peak_position} '
+                                         f'on {other_date_display}')
+            print(', '.join(performer_history))
         print()
+
+
+def find_peak(song, all_weeks):
+    chart_date = song.chart_date
+    display = Namespace(song=song)
+    song_entries = all_weeks[all_weeks['song_id'] == song.song_id]
+    song_entries = song_entries.sort_values(['instance',
+                                             'time_on_chart'])
+    positions = []
+    peak_pos = None
+    peak_date = None
+    for song_entry in song_entries.itertuples():
+        if peak_pos is None or song_entry.chart_position < peak_pos:
+            peak_date = song_entry.chart_date
+            peak_pos = song_entry.chart_position
+        prefix = '#' if song_entry.chart_date == chart_date else ''
+        pos_text = ('*' * (song_entry.instance - 1) +
+                    prefix +
+                    str(song_entry.chart_position))
+        positions.append(pos_text)
+    stored_format = DATE_STORED_FORMAT  # .replace('-', '')
+    display.peak_position = peak_pos
+    display.peak_date = datetime.strptime(peak_date, stored_format)
+    display.positions = positions
+    return display
 
 
 main()
