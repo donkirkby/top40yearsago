@@ -102,7 +102,8 @@ def display_songs(heading, songs, all_weeks, min_peak):
             print(', '.join(display.positions))
             performer_history_displays = []
             performer_songs = all_weeks[all_weeks['performer'] == song.performer]
-            for other_song_name, other_song_entries in performer_songs.groupby('song'):
+            for other_song_name, other_song_entries in performer_songs.groupby(
+                    ['song', 'instance']):
                 other_song = next(other_song_entries.itertuples())
                 other_display = find_peak(other_song, other_song_entries)
                 performer_history_displays.append(other_display)
