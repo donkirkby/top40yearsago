@@ -108,13 +108,11 @@ def display_songs(heading, songs, all_weeks, min_peak):
                 other_display = find_peak(other_song, other_song_entries)
                 performer_history_displays.append(other_display)
             performer_history_displays.sort(key=attrgetter('peak_date'))
-            performer_history = []
             for other_display in performer_history_displays:
-                other_date_display = other_display.peak_date.strftime(DATE_DISPLAY_FORMAT)
-                performer_history.append(f'{other_display.song.song} '
-                                         f'#{other_display.peak_position} '
-                                         f'on {other_date_display}')
-            print(', '.join(performer_history))
+                other_date_display = other_display.peak_date.strftime(
+                    DATE_DISPLAY_FORMAT)
+                print(f'  #{other_display.peak_position:2d} - {other_date_display}'
+                      f' - {other_display.song.song}')
         print()
 
 
