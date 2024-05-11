@@ -24,6 +24,9 @@ def parse_args():
     # noinspection PyTypeChecker
     parser = ArgumentParser(description='Find top 40 events from 40 years ago.',
                             formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-p',
+                        '--performer',
+                        help='performer to list history for')
     parser.add_argument('date',
                         help='date to scan',
                         nargs='?',
@@ -54,7 +57,6 @@ def find_diffs(max_position, min_peak, base, other, all_weeks):
 
 def main():
     args = parse_args()
-    print(f'Events for the week of {args.date.strftime(DATE_DISPLAY_FORMAT)}:')
     # chart_position,chart_date,song,performer,song_id,instance,time_on_chart,
     # consecutive_weeks,previous_week,peak_position,worst_position,chart_debut,
     # chart_url
@@ -62,6 +64,12 @@ def main():
     all_weeks = all_weeks.rename(
         columns=lambda label: label.lower().replace(' ', '_'))
     all_weeks['all_time_peak'] = 0
+
+    if args.performer:
+        display_performer_history(args.performer, all_weeks)
+        return
+
+    print(f'Events for the week of {args.date.strftime(DATE_DISPLAY_FORMAT)}:')
     week_text = args.date.strftime(DATE_STORED_FORMAT)
     week_df: DataFrame = all_weeks[all_weeks['chart_date'] == week_text].copy()
     if week_df.empty:
@@ -100,20 +108,24 @@ def display_songs(heading, songs, all_weeks, min_peak):
                   f'{display.peak_date.strftime(DATE_DISPLAY_FORMAT)}. #1980s '
                   f'#MusicHistory #MusicVideo')
             print(', '.join(display.positions))
-            performer_history_displays = []
-            performer_songs = all_weeks[all_weeks['performer'] == song.performer]
-            for other_song_name, other_song_entries in performer_songs.groupby(
-                    ['song', 'instance']):
-                other_song = next(other_song_entries.itertuples())
-                other_display = find_peak(other_song, other_song_entries)
-                performer_history_displays.append(other_display)
-            performer_history_displays.sort(key=attrgetter('peak_date'))
-            for other_display in performer_history_displays:
-                other_date_display = other_display.peak_date.strftime(
-                    DATE_DISPLAY_FORMAT)
-                print(f'  #{other_display.peak_position:2d} - {other_date_display}'
-                      f' - {other_display.song.song}')
+            display_performer_history(song.performer, all_weeks)
         print()
+
+
+def display_performer_history(performer_name, all_weeks):
+    performer_history_displays = []
+    performer_songs = all_weeks[all_weeks['performer'] == performer_name]
+    for other_song_name, other_song_entries in performer_songs.groupby(
+            ['song', 'instance']):
+        other_song = next(other_song_entries.itertuples())
+        other_display = find_peak(other_song, other_song_entries)
+        performer_history_displays.append(other_display)
+    performer_history_displays.sort(key=attrgetter('peak_date'))
+    for other_display in performer_history_displays:
+        other_date_display = other_display.peak_date.strftime(
+            DATE_DISPLAY_FORMAT)
+        print(f'  #{other_display.peak_position:2d} - {other_date_display}'
+              f' - {other_display.song.song}')
 
 
 def find_peak(song, all_weeks):
