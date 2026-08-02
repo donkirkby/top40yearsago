@@ -25,6 +25,6 @@ a `TOP40URL` environment variable with the Mastodon server's URL. Create a
 personal access token in GitHub, and configure the `GITHUBTOKEN` and
 `GITHUBREPO` environment variables.
 
-[Hot 100]: https://data.world/kcmillersean/billboard-hot-100-1958-2017
+[Hot 100]: https://github.com/HipsterVizNinja/random-data/tree/main/Music/hot-100
 [cancon]: http://www.bac-lac.gc.ca/eng/discover/films-videos-sound-recordings/rpm/Pages/rpm.aspx
 [brits]: https://www.officialcharts.com/charts/singles-chart/19790902/7501/
